@@ -11,13 +11,6 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use("/api", apiRoutes)
 
-// http://localhost:3008/api/v1/test
-// app.get('/api/v1/blogs',(req,res)=>{
-//     res.send({
-//         data :"working"
-//     })
-// })
-
 
 app.use(ErrorMiddleware.errorHandler)
 app.use(ErrorMiddleware.notFound)

@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 // Function to hash the password
 const hashPassword = async (plainPassword) => {
     try {
-        console.log(plainPassword)
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(plainPassword, salt);
         return hashedPassword;
