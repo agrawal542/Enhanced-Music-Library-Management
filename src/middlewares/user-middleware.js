@@ -1,9 +1,11 @@
 const jwt = require("jsonwebtoken");
 const { StatusCodes } = require("http-status-codes");
-const { UserRepository } = require("../repositories");
+const { UserRepository, RoleRepository } = require("../repositories");
 const AppError = require("../utils/errors/app-error.js");
 
 const userRepository = new UserRepository();
+const roleRepository = new RoleRepository();
+
 
 const verifyJWT = async (req, res, next) => {
     try {
@@ -47,4 +49,24 @@ const verifyJWT = async (req, res, next) => {
     }
 };
 
-module.exports = { verifyJWT };
+
+const authorize = (requiredRoles = []) => {
+    return async(req, res, next) => {
+      try {
+        const role = await roleRepository.getByColumn({ role_id: req.user.role_id });
+        if (!role) {
+            throw new AppError('Role not found.', StatusCodes.NOT_FOUND);
+        }
+  
+        if (!requiredRoles.includes(role.dataValues.key)) {
+          throw new AppError("Forbidden Access/Operation not allowed.", StatusCodes.FORBIDDEN);
+        }
+  
+        next();
+      } catch (error) {
+        next(error);
+      }
+    };
+  };
+
+module.exports = { verifyJWT, authorize};

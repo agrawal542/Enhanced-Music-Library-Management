@@ -3,6 +3,7 @@ const { UserRepository, OrganizationRepository, RoleRepository } = require('../r
 const AppError = require('../utils/errors/app-error');
 const { Enums } = require('../utils/common');
 const { UserHelper } = require('../utils/helpers');
+const { Op } = require('sequelize');
 const { ADMIN } = Enums.ROLE_NAME;
 
 const userRepository = new UserRepository();
@@ -151,12 +152,13 @@ async function deleteUser(data) {
 
 async function getUserList(data, query) {
     try {
-        let customWhereFilter = {};
+        let customWhereFilter = {
+            org_id: data.org_id,
+            status: { [Op.ne]: 2 }  // remove the deleted users
+        };
         let customOrderFilter = [['createdAt', 'ASC']];
-        const limit = query.limit ? parseInt(query.limit, 10) : 5; 
-        const offset = query.offset ? parseInt(query.offset, 10) : 1; 
-
-        customWhereFilter.org_id = data.org_id;
+        const limit = query.limit ? parseInt(query.limit, 10) : 5;
+        const offset = query.offset ? parseInt(query.offset, 10) : 1;
 
         if (query.role) {
             const role = await roleRepository.getByColumn({ key: query.role });
@@ -170,11 +172,11 @@ async function getUserList(data, query) {
                 customOrderFilter.push(info)
             });
         }
-
-        const users = await userRepository.getAllUsers(customWhereFilter, customOrderFilter,limit,offset);
-        return users;
+        
+        const users = await userRepository.getAllUsers(customWhereFilter, customOrderFilter, limit, offset);
+        return { users, total_record: users.length };
     } catch (error) {
-        throw error ;
+        throw error;
     }
 }
 
