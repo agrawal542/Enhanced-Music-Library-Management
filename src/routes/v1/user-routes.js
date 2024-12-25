@@ -4,8 +4,8 @@ const { UserController } = require("../../controllers");
 
 const router = express.Router();
 
-// /api/v1/airports  POST
-router.post('/',UserController.register)
+router.post('/signup', UserController.signup)
+router.post('/login', UserController.login)
 
 
 module.exports = router;

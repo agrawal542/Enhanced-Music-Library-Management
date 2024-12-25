@@ -48,6 +48,13 @@ class CrudRepository {
         }
         return response;
     }
+
+    async getByColumn(data) {
+        const response = await this.model.findOne({
+            where: data, 
+        });
+        return response;
+    }
 }
 
 module.exports = CrudRepository;
