@@ -6,16 +6,22 @@ const { ErrorResponse } = require("../utils/common");
 
 // General error handler
 const errorHandler = (err, req, res, next) => {
-
+  console.log("---errorHandler---",err)
   // Convert ValidationError to ApiError
   if (err instanceof ValidationError) {
-    err = new AppError(err.message || "Validation error", err.statusCode || 400);
+     err = new AppError(err.message || "Validation error", err.statusCode || 400);
   }
+
+  // if (error.name === 'SequelizeValidationError') {
+  //   const explanation = error.errors.map((err) => err.message);
+  //   throw new AppError(explanation.join(', '), StatusCodes.BAD_REQUEST);
+  // }
 
   // Ensure error is an instance of ApiError
   if (!(err instanceof AppError)) {
     err = new AppError(err.message || "Internal Server Error",err.status || 500);
   }
+
 
   ErrorResponse.error = err
   return res.status(err.statusCode).json(ErrorResponse);

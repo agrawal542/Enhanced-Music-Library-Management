@@ -32,7 +32,7 @@ async function signup(data) {
         // Get the ADMIN role
         const role = await roleRepository.getByColumn({ key: ADMIN });
         if (!role) {
-            throw new AppError('Admin role not found. Please contact support.', StatusCodes.NOT_FOUND);
+            throw new AppError('Role not found.', StatusCodes.NOT_FOUND);
         }
 
         const hashPassword = await UserHelper.hashPassword(data.password);
@@ -49,15 +49,7 @@ async function signup(data) {
 
         return user;
     } catch (error) {
-        console.log(error)
-        if (error.name === 'SequelizeValidationError') {
-            const explanation = error.errors.map((err) => err.message);
-            throw new AppError(explanation.join(', '), StatusCodes.BAD_REQUEST);
-        }
-        if (error instanceof AppError) {
-            throw error; // Re-throw custom application errors
-        }
-        throw new AppError('An unexpected error occurred during registration. Please try again later.', StatusCodes.INTERNAL_SERVER_ERROR);
+        throw error;
     }
 }
 
@@ -65,8 +57,8 @@ async function login(data) {
     try {
         // Check if the organization already exists
         const user = await userRepository.getByColumn({ email: data.email });
-        if (!user) {
-            throw new AppError('User not found.', StatusCodes.CONFLICT);
+        if (!user || user?.dataValues?.status === 2) {
+            throw new AppError('User not found.', StatusCodes.NOT_FOUND);
         }
 
         const verifyPassword = await UserHelper.verifyPassword(data.password, user.dataValues.password);
@@ -81,28 +73,18 @@ async function login(data) {
             org_id: user.dataValues.org_id,
         });
 
-
         await userRepository.update(user.dataValues.user_id, {
             status: 1
         })
 
         return { user, token };
     } catch (error) {
-        if (error.name === 'SequelizeValidationError') {
-            const explanation = error.errors.map((err) => err.message);
-            throw new AppError(explanation.join(', '), StatusCodes.BAD_REQUEST);
-        }
-        if (error instanceof AppError) {
-            throw error; // Re-throw custom application errors
-        }
-        throw new AppError('An unexpected error occurred during login. Please try again later.', StatusCodes.INTERNAL_SERVER_ERROR);
+        throw error;
     }
 }
 
 async function logout(data) {
     try {
-        console.log(data,"------")
-        // Check if the organization already exists
         const user_id = data.user_id
 
         await userRepository.update(user_id, {
@@ -110,10 +92,60 @@ async function logout(data) {
         })
         return;
     } catch (error) {
-        if (error instanceof AppError) {
-            throw error;
+        throw error;
+    }
+}
+
+async function addUser(data) {
+    try {
+        // Check if the organization already exists
+
+        let user = await userRepository.getByColumn({ email: data.email });
+        if (user) {
+            throw new AppError('Email already exists.', StatusCodes.CONFLICT);
         }
-        throw new AppError('An unexpected error occurred during login. Please try again later.', StatusCodes.INTERNAL_SERVER_ERROR);
+
+        const role = await roleRepository.getByColumn({ key: data.role });
+        if (!role) {
+            throw new AppError('Role not found.', StatusCodes.NOT_FOUND);
+        }
+
+        const hashPassword = await UserHelper.hashPassword(data.password);
+
+        // Create a new user
+        const user_id = "user_" + Math.random().toString(36).substr(2, 9); // Generate unique user_id
+
+        user = await userRepository.create({
+            user_id,
+            email: data.email,
+            password: hashPassword, // Ensure password is hashed before saving
+            org_id: data.org_id,
+            role_id: role.dataValues.role_id // Assuming the role has an `id` property
+        });
+        return user;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function deleteUser(data) {
+    try {
+        const user_id = data.user_id;
+        const user = await userRepository.getByColumn({ user_id: data.user_id });
+        if (!user) {
+            throw new AppError('User not found.', StatusCodes.CONFLICT);
+        }
+
+        if (user.dataValues.status === 2) {
+            throw new AppError("User already deleted.", StatusCodes.FORBIDDEN)
+        }
+
+        await userRepository.update(user_id, {
+            status: 2
+        })
+        return;
+    } catch (error) {
+        throw error;
     }
 }
 
@@ -121,5 +153,7 @@ async function logout(data) {
 module.exports = {
     signup,
     login,
-    logout
+    logout,
+    addUser,
+    deleteUser
 };

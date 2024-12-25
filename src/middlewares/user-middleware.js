@@ -11,7 +11,7 @@ const verifyJWT = async (req, res, next) => {
         const token = req.header("Authorization")?.replace("Bearer ", "");
 
         if (!token) {
-            throw new AppError("Unauthorized request", StatusCodes.UNAUTHORIZED);
+            throw new AppError("Unauthorized Access.", StatusCodes.UNAUTHORIZED);
         }
 
         // Verify token
@@ -22,23 +22,28 @@ const verifyJWT = async (req, res, next) => {
 
 
         const user = await userRepository.getByColumn({ user_id: req.user.user_id });
-        if (!user.dataValues.status) {
+
+        if (!user) {
+            throw new AppError("User not found.", StatusCodes.UNAUTHORIZED)
+        }
+        if (user?.dataValues?.status === 0) {
             throw new AppError("User already logout.", StatusCodes.UNAUTHORIZED)
         }
-
+        else if (user?.dataValues?.status === 2) {
+            throw new AppError("Forbidden Access.", StatusCodes.UNAUTHORIZED)
+        }
         next();
     } catch (error) {
-
         if (error.name === "TokenExpiredError") {
-            throw new AppError("Token expired, please log in again", StatusCodes.UNAUTHORIZED);
+            return  next( new AppError("Token expired, please log in again", StatusCodes.UNAUTHORIZED))
         }
         else if (error.name === "JsonWebTokenError") {
-            throw new AppError("Invalid token.", StatusCodes.UNAUTHORIZED);
+            return next( new AppError("Invalid token.", StatusCodes.UNAUTHORIZED))
         }
         else if (error instanceof AppError) {
            return next(error); // Re-throw custom application errors
         }
-        throw new AppError("Authentication failed! Please log in again.", StatusCodes.UNAUTHORIZED);
+        return next(new AppError("Authentication failed! Please log in again.", StatusCodes.UNAUTHORIZED))
     }
 };
 

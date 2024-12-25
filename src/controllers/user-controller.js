@@ -1,9 +1,9 @@
 const { StatusCodes } = require("http-status-codes");
-const { SuccessResponse} = require("../utils/common");
+const { SuccessResponse } = require("../utils/common");
 const { UserService } = require("../services");
 
 
-async function signup(req, res, next ) {
+async function signup(req, res, next) {
     try {
         const user = await UserService.signup({
             email: req.body.email,
@@ -14,7 +14,7 @@ async function signup(req, res, next ) {
         SuccessResponse.data = user;
         return res.status(StatusCodes.CREATED).json(SuccessResponse);
     } catch (error) {
-        return next(error) ;
+        return next(error);
     }
 }
 
@@ -28,11 +28,11 @@ async function login(req, res, next) {
         SuccessResponse.data = user;
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
-        return next(error) ;
+        return next(error);
     }
 }
 
-async function logout(req, res) {
+async function logout(req, res, next) {
     try {
         const user_uid = req.user.user_id;
         const user = await UserService.logout({ user_id: user_uid })
@@ -40,9 +40,41 @@ async function logout(req, res) {
         SuccessResponse.data = user;
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
-        return next(error) ;
+        return next(error);
+    }
+}
+
+async function addUser(req, res, next) {
+    try {
+        const org_id = req.user.org_id;
+
+        const user = await UserService.addUser({
+            email: req.body.email,
+            password: req.body.password,
+            role: req.body.role,
+            org_id: org_id
+        })
+        SuccessResponse.message = "User created successfully.",
+            SuccessResponse.data = user;
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        return next(error);
+    }
+}
+
+async function deleteUser(req, res, next) {
+    try {
+        const user_id = req.params.user_id;
+
+        await UserService.deleteUser({
+            user_id: user_id
+        })
+        SuccessResponse.message = "User deleted successfully."
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        return next(error);
     }
 }
 
 
-module.exports = { signup, login, logout }
+module.exports = { signup, login, logout, addUser, deleteUser }
