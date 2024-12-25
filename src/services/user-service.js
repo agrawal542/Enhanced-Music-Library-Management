@@ -14,7 +14,12 @@ async function signup(data) {
         // Check if the organization already exists
         let org = await organizationRepository.getByColumn({ name: data.org_name });
         if (org) {
-            throw new AppError('Organization already exists. Please choose a different name.', StatusCodes.CONFLICT);
+            throw new AppError('Organization already exists.', StatusCodes.CONFLICT);
+        }
+
+        let user = await userRepository.getByColumn({ email: data.email });
+        if (user) {
+            throw new AppError('Email already exists.', StatusCodes.CONFLICT);
         }
 
         // Create a new organization
@@ -34,7 +39,7 @@ async function signup(data) {
 
         // Create a new user
         const user_id = "user_" + Math.random().toString(36).substr(2, 9); // Generate unique user_id
-        const user = await userRepository.create({
+        user = await userRepository.create({
             user_id,
             email: data.email,
             password: hashPassword, // Ensure password is hashed before saving
@@ -66,7 +71,7 @@ async function login(data) {
 
         const verifyPassword = await UserHelper.verifyPassword(data.password, user.dataValues.password);
         if (!verifyPassword) {
-            throw new AppError('Passwrod is invalid.', StatusCodes.CONFLICT);
+            throw new AppError('Password is invalid.', StatusCodes.CONFLICT);
         }
 
         const token = await UserHelper.createJwtToken({
@@ -76,9 +81,13 @@ async function login(data) {
             org_id: user.dataValues.org_id,
         });
 
+
+        await userRepository.update(user.dataValues.user_id, {
+            status: 1
+        })
+
         return { user, token };
     } catch (error) {
-        console.log(error)
         if (error.name === 'SequelizeValidationError') {
             const explanation = error.errors.map((err) => err.message);
             throw new AppError(explanation.join(', '), StatusCodes.BAD_REQUEST);
@@ -90,8 +99,27 @@ async function login(data) {
     }
 }
 
+async function logout(data) {
+    try {
+        console.log(data,"------")
+        // Check if the organization already exists
+        const user_id = data.user_id
+
+        await userRepository.update(user_id, {
+            status: 0
+        })
+        return;
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError('An unexpected error occurred during login. Please try again later.', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 
 module.exports = {
     signup,
-    login
+    login,
+    logout
 };

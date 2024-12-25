@@ -1,9 +1,9 @@
 const { StatusCodes } = require("http-status-codes");
-const { SuccessResponse, ErrorResponse } = require("../utils/common");
+const { SuccessResponse} = require("../utils/common");
 const { UserService } = require("../services");
 
 
-async function signup(req, res) {
+async function signup(req, res, next ) {
     try {
         const user = await UserService.signup({
             email: req.body.email,
@@ -14,12 +14,11 @@ async function signup(req, res) {
         SuccessResponse.data = user;
         return res.status(StatusCodes.CREATED).json(SuccessResponse);
     } catch (error) {
-        ErrorResponse.error = error;
-        return res.status(error.statusCode).json(ErrorResponse)
+        return next(error) ;
     }
 }
 
-async function login(req, res) {
+async function login(req, res, next) {
     try {
         const user = await UserService.login({
             email: req.body.email,
@@ -29,10 +28,21 @@ async function login(req, res) {
         SuccessResponse.data = user;
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
-        ErrorResponse.error = error;
-        return res.status(error.statusCode).json(ErrorResponse)
+        return next(error) ;
+    }
+}
+
+async function logout(req, res) {
+    try {
+        const user_uid = req.user.user_id;
+        const user = await UserService.logout({ user_id: user_uid })
+        SuccessResponse.message = "User logged out successfully."
+        SuccessResponse.data = user;
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        return next(error) ;
     }
 }
 
 
-module.exports = { signup ,login}
+module.exports = { signup, login, logout }

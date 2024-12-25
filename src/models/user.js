@@ -35,6 +35,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: 0
+    },
     org_id: {
       type: DataTypes.STRING,
       allowNull: false,
