@@ -149,11 +149,42 @@ async function deleteUser(data) {
     }
 }
 
+async function getUserList(data, query) {
+    try {
+        let customWhereFilter = {};
+        let customOrderFilter = [['createdAt', 'ASC']];
+        const limit = query.limit ? parseInt(query.limit, 10) : 5; 
+        const offset = query.offset ? parseInt(query.offset, 10) : 1; 
+
+        customWhereFilter.org_id = data.org_id;
+
+        if (query.role) {
+            const role = await roleRepository.getByColumn({ key: query.role });
+            customWhereFilter.role_id = role.dataValues.role_id;
+        }
+
+        if (query.sort) {
+            const params = query.sort.split(',');
+            params.forEach(element => {
+                const info = element.split('_');
+                customOrderFilter.push(info)
+            });
+        }
+
+        const users = await userRepository.getAllUsers(customWhereFilter, customOrderFilter,limit,offset);
+        return users;
+    } catch (error) {
+        throw error ;
+    }
+}
+
+
 
 module.exports = {
     signup,
     login,
     logout,
     addUser,
-    deleteUser
+    deleteUser,
+    getUserList
 };

@@ -30,7 +30,7 @@ const verifyJWT = async (req, res, next) => {
             throw new AppError("User already logout.", StatusCodes.UNAUTHORIZED)
         }
         else if (user?.dataValues?.status === 2) {
-            throw new AppError("Forbidden Access.", StatusCodes.UNAUTHORIZED)
+            throw new AppError("User is deleted", StatusCodes.UNAUTHORIZED)
         }
         next();
     } catch (error) {

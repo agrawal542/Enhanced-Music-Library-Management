@@ -76,5 +76,20 @@ async function deleteUser(req, res, next) {
     }
 }
 
+async function getUserList(req, res, next) {
+    try {
+        const org_id = req.user.org_id;
 
-module.exports = { signup, login, logout, addUser, deleteUser }
+        const users = await UserService.getUserList({
+            org_id: org_id
+        }, req.query)
+        SuccessResponse.data = users;
+        SuccessResponse.message = "Users retrieved successfully."
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        return next(error);
+    }
+}
+
+
+module.exports = { signup, login, logout, addUser, deleteUser, getUserList }

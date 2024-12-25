@@ -14,10 +14,12 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.Organization, {
         foreignKey: 'org_id',
         onDelete: "CASCADE",
+        as: "orgnization_details"
       });
-      this.belongsTo(models.User, {
-        foreignKey: 'user_id',
+      this.belongsTo(models.Role, {
+        foreignKey: 'role_id',
         onDelete: "CASCADE",
+        as: "role_details"
       });
     }
   }
