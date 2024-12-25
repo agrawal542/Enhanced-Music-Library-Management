@@ -10,6 +10,7 @@ const ROLE_NAME = {
     VIEWER: 'viewer',
 }
 
+
 module.exports = {
     CATEGORY,
     ROLE_NAME

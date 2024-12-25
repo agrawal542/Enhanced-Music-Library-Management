@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.Orginization, {
+      this.belongsTo(models.Organization, {
         foreignKey: 'org_id',
         onDelete: "CASCADE",
       });
@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     email: {
       type: DataTypes.STRING,
-      unique: true
+      allowNull: false,
     },
     password: {
       type: DataTypes.STRING,
