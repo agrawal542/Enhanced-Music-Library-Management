@@ -91,5 +91,21 @@ async function getUserList(req, res, next) {
     }
 }
 
+async function updateUser(req, res, next) {
+    try {
+        const user_id = req.user.user_id;
 
-module.exports = { signup, login, logout, addUser, deleteUser, getUserList }
+        const user = await UserService.updateUser({
+            old_password: req.body.old_password,
+            new_password: req.body.new_password,
+            user_id: user_id
+        })
+        SuccessResponse.message = "Password updated successfully.",
+        SuccessResponse.data = user;
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        return next(error);
+    }
+}
+
+module.exports = { signup, login, logout, addUser, deleteUser, getUserList, updateUser }

@@ -172,7 +172,7 @@ async function getUserList(data, query) {
                 customOrderFilter.push(info)
             });
         }
-        
+
         const users = await userRepository.getAllUsers(customWhereFilter, customOrderFilter, limit, offset);
         return { users, total_record: users.length };
     } catch (error) {
@@ -180,6 +180,34 @@ async function getUserList(data, query) {
     }
 }
 
+async function updateUser(data) {
+    try {
+
+        const user = await userRepository.getByColumn({ user_id: data.user_id });
+
+        if (!user || user?.dataValues?.status === 2) {
+            throw new AppError('User not found.', StatusCodes.NOT_FOUND);
+        }
+
+        const verifyPassword = await UserHelper.verifyPassword(data.old_password, user.dataValues.password);
+        if (!verifyPassword) {
+            throw new AppError('Old Password is invalid.', StatusCodes.CONFLICT);
+        }
+
+        if (data.old_password === data.new_password) {
+            throw new AppError("New password can't same old password.", StatusCodes.NOT_FOUND);
+        }
+
+        const hashPassword = await UserHelper.hashPassword(data.new_password);
+
+        await userRepository.update(data.user_id, {
+            password: hashPassword
+        })
+        return user;
+    } catch (error) {
+        throw error;
+    }
+}
 
 
 module.exports = {
@@ -188,5 +216,6 @@ module.exports = {
     logout,
     addUser,
     deleteUser,
-    getUserList
+    getUserList,
+    updateUser
 };

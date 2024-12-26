@@ -15,6 +15,7 @@ router.get('/logout', UserMiddleware.verifyJWT, UserController.logout)
 router.post('/add-user', UserMiddleware.verifyJWT, UserMiddleware.authorize([ADMIN]), UserController.addUser)
 router.delete('/:user_id', UserMiddleware.verifyJWT, UserMiddleware.authorize([ADMIN]), UserController.deleteUser)
 router.get('/', UserMiddleware.verifyJWT, UserMiddleware.authorize([ADMIN]), UserController.getUserList)
+router.put('/update-password', UserMiddleware.verifyJWT, UserController.updateUser)
 
 
 
