@@ -7,8 +7,10 @@ const { ErrorResponse } = require("../utils/common");
 // General error handler
 const errorHandler = (err, req, res, next) => {
   // Convert ValidationError to ApiError
+
   if (err instanceof ValidationError) {
-     err = new AppError(err.message || "Validation error", err.statusCode || 400);
+     ErrorResponse.message = err.error || "Validation error"
+     err = new AppError(err.details, err.statusCode || 400);
   }
 
   // if (error.name === 'SequelizeValidationError') {

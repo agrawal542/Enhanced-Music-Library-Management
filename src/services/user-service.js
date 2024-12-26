@@ -180,7 +180,7 @@ async function getUserList(data, query) {
     }
 }
 
-async function updateUser(data) {
+async function updatePassword(data) {
     try {
 
         const user = await userRepository.getByColumn({ user_id: data.user_id });
@@ -217,5 +217,5 @@ module.exports = {
     addUser,
     deleteUser,
     getUserList,
-    updateUser
+    updatePassword
 };
