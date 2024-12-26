@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { ServerConfig } = require("../../config");
 
 // Function to hash the password
 const hashPassword = async (plainPassword) => {
@@ -25,7 +26,7 @@ const verifyPassword = async (plainPassword, hashedPassword) => {
 // Function to create a JWT token for the user
 const createJwtToken = async (data) => {
     try {
-        return jwt.sign(data, process.env.JWT_SECRET, { expiresIn: '24h' });
+        return jwt.sign(data, ServerConfig.JWT_SECRET, { expiresIn: '24h' });
     } catch (error) {
         throw new Error("Error generating JWT token.");
     }
