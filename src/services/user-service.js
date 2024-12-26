@@ -131,8 +131,10 @@ async function addUser(data) {
 
 async function deleteUser(data) {
     try {
-        const user_id = data.user_id;
-        const user = await userRepository.getByColumn({ user_id: data.user_id });
+        if (data.user_id === data.delete_user_id) {
+            throw new AppError("You can't delete yourself.", StatusCodes.CONFLICT);
+        }
+        const user = await userRepository.getByColumn({ user_id: data.delete_user_id });
         if (!user) {
             throw new AppError('User not found.', StatusCodes.CONFLICT);
         }
@@ -141,7 +143,7 @@ async function deleteUser(data) {
             throw new AppError("User already deleted.", StatusCodes.FORBIDDEN)
         }
 
-        await userRepository.update(user_id, {
+        await userRepository.update(user.dataValues.user_id , {
             status: 2
         })
         return;

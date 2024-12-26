@@ -1,0 +1,320 @@
+openapi: 3.0.0
+info:
+  title: Enhanced Music Library Management API
+  description: APIs for handling authentication, user management, and profile functionalities.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3002
+
+tags:
+  - name: User
+    description: APIs for user authentication and management
+
+paths:
+  /api/v1/users/signup:
+    post:
+      tags:
+        - User
+      summary: Register a new user
+      description: Registers a new user as admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSignup"
+      responses:
+        "201":
+          description: User successfully registered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error.
+
+  /api/v1/users/login:
+    post:
+      tags:
+        - User
+      summary: User login
+      description: Logs in a user and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCredentials"
+      responses:
+        "200":
+          description: User logged in successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error.
+
+  /api/v1/users/logout:
+    get:
+      tags:
+        - User
+      summary: User logout
+      description: Logs out a user and invalidates their session.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User logged out successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "500":
+          description: Internal server error.
+
+  /api/v1/users/add-user:
+    post:
+      tags:
+        - User
+      summary: Add a new user
+      description: Adds a new user to the organization.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddUser"
+      responses:
+        "200":
+          description: User added successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error.
+
+  /api/v1/users/{user_id}:
+    delete:
+      tags:
+        - User
+      summary: Delete a user
+      description: Deletes a user based on their ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to delete.
+      responses:
+        "200":
+          description: User deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error.
+
+  /api/v1/users/:
+    get:
+      tags:
+        - User
+      summary: Retrieve user list
+      description: Retrieves a list of users in the organization.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of users retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+        "500":
+          description: Internal server error.
+
+  /api/v1/users/update-password:
+    put:
+      tags:
+        - User
+      summary: Update user password
+      description: Updates the password of a logged-in user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePassword"
+      responses:
+        "200":
+          description: Password updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserSignup:
+      type: object
+      properties:
+        email:
+          type: string
+          example: user@example.com
+        password:
+          type: string
+          example: Password@123
+        org_name:
+          type: string
+          example: Example Corp
+      required:
+        - email
+        - password
+        - org_name
+
+    UserCredentials:
+      type: object
+      properties:
+        email:
+          type: string
+          example: user@example.com
+        password:
+          type: string
+          example: Password@123
+      required:
+        - email
+        - password
+
+    AddUser:
+      type: object
+      properties:
+        email:
+          type: string
+          example: user2@example.com
+        password:
+          type: string
+          example: Password@123
+        role:
+          type: string
+          example: admin
+      required:
+        - email
+        - password
+        - role
+
+    UpdatePassword:
+      type: object
+      properties:
+        old_password:
+          type: string
+          example: OldPassword@123
+        new_password:
+          type: string
+          example: NewPassword@123
+      required:
+        - old_password
+        - new_password
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation completed successfully.
+        data:
+          type: object
+          example: {}
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: An error occurred.
+        error:
+          type: object
+          example: { details: "Validation failed" }
+        data:
+          type: object
+          example: {}
+
+    UserListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Users retrieved successfully.
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: string
+                example: 12345
+              email:
+                type: string
+                example: user@example.com
+              role:
+                type: string
+                example: admin
+        error:
+          type: object
+          example: {}

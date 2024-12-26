@@ -37,7 +37,7 @@ async function logout(req, res, next) {
         const user_uid = req.user.user_id;
         const user = await UserService.logout({ user_id: user_uid })
         SuccessResponse.message = "User logged out successfully."
-        SuccessResponse.data = user;
+        SuccessResponse.data = {};
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
         return next(error);
@@ -64,11 +64,15 @@ async function addUser(req, res, next) {
 
 async function deleteUser(req, res, next) {
     try {
-        const user_id = req.params.user_id;
+        const user_id = req.user.user_id;
+        const delete_user_id = req.params.user_id;
 
         await UserService.deleteUser({
-            user_id: user_id
+            user_id: user_id,
+            delete_user_id: delete_user_id,
         })
+
+        SuccessResponse.data = {};
         SuccessResponse.message = "User deleted successfully."
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
@@ -100,8 +104,8 @@ async function updatePassword(req, res, next) {
             new_password: req.body.new_password,
             user_id: user_id
         })
-        SuccessResponse.message = "Password updated successfully." ;
-        SuccessResponse.data = user;
+        SuccessResponse.message = "Password updated successfully.";
+        SuccessResponse.data = {};
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
         return next(error);

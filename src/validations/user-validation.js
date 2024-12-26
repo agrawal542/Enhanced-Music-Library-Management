@@ -62,10 +62,9 @@ const addUserValidation = validate(
                 "string.empty": "Password cannot be empty.",
                 "any.required": "Password is required.",
             }),
-            role: Joi.string().trim().required().valid(ADMIN, VIEWER, EDITOR).messages({
+            role: Joi.string().trim().required().valid(VIEWER, EDITOR).messages({
                 "string.empty": "Role cannot be empty.",
                 "any.required": "Role is required.",
-                "any.only": "Invalid role. Accepted values are ADMIN, VIEWER, or EDITOR.",
             }),
         }),
     },
