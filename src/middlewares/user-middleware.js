@@ -37,13 +37,13 @@ const verifyJWT = async (req, res, next) => {
         next();
     } catch (error) {
         if (error.name === "TokenExpiredError") {
-            return  next( new AppError("Token expired, please log in again", StatusCodes.UNAUTHORIZED))
+            return next(new AppError("Token expired, please log in again", StatusCodes.UNAUTHORIZED))
         }
         else if (error.name === "JsonWebTokenError") {
-            return next( new AppError("Invalid token.", StatusCodes.UNAUTHORIZED))
+            return next(new AppError("Invalid token.", StatusCodes.UNAUTHORIZED))
         }
         else if (error instanceof AppError) {
-           return next(error); // Re-throw custom application errors
+            return next(error); // Re-throw custom application errors
         }
         return next(new AppError("Authentication failed! Please log in again.", StatusCodes.UNAUTHORIZED))
     }
@@ -51,22 +51,22 @@ const verifyJWT = async (req, res, next) => {
 
 
 const authorize = (requiredRoles = []) => {
-    return async(req, res, next) => {
-      try {
-        const role = await roleRepository.getByColumn({ role_id: req.user.role_id });
-        if (!role) {
-            throw new AppError('Role not found.', StatusCodes.NOT_FOUND);
-        }
-  
-        if (!requiredRoles.includes(role.dataValues.key)) {
-          throw new AppError("Forbidden Access/Operation not allowed.", StatusCodes.FORBIDDEN);
-        }
-  
-        next();
-      } catch (error) {
-        next(error);
-      }
-    };
-  };
+    return async (req, res, next) => {
+        try {
+            const role = await roleRepository.getByColumn({ role_id: req.user.role_id });
+            if (!role) {
+                throw new AppError('Role not found.', StatusCodes.NOT_FOUND);
+            }
 
-module.exports = { verifyJWT, authorize};
+            if (!requiredRoles.includes(role.dataValues.key)) {
+                throw new AppError("Forbidden Access/Operation not allowed.", StatusCodes.FORBIDDEN);
+            }
+
+            next();
+        } catch (error) {
+            next(error);
+        }
+    };
+};
+
+module.exports = { verifyJWT, authorize };
