@@ -4,18 +4,24 @@ const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
 const process = require('process');
-const { ServerConfig } = require('../config');
+const dotenv = require('dotenv');
+dotenv.config(); // Load environment variables
+
 const basename = path.basename(__filename);
-
-const env = ServerConfig.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+const env = process.env.NODE_ENV || 'development'; // Default to 'development' if NODE_ENV is not set
+const config = require(path.join(__dirname, '../config/config.json'))[env]; // Load the correct environment's config
 const db = {};
-
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+try {
+  if (config.use_env_variable) {
+    sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  } else {
+    sequelize = new Sequelize(config.database, config.username, config.password, config);
+  }
+  console.log(`Database connection established successfully in '${env}' environment. Connected to database: '${sequelize.config.database}'.`);
+} catch (error) {
+  console.error(`Failed to connect to the database in '${env}' environment:`, error.message);
+  process.exit(1); // Exit the process if the database connection fails
 }
 
 fs
