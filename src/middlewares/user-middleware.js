@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const { StatusCodes } = require("http-status-codes");
 const { UserRepository, RoleRepository } = require("../repositories");
 const AppError = require("../utils/errors/app-error.js");
+const { Enums } = require('../utils/common');
+const { ROE_NAME, USER_STATUS } = Enums;
 
 const userRepository = new UserRepository();
 const roleRepository = new RoleRepository();
@@ -21,18 +23,10 @@ const verifyJWT = async (req, res, next) => {
 
         // Attach decoded token to request object
         req.user = decodedToken;
-
-
         const user = await userRepository.getByColumn({ user_id: req.user.user_id });
 
-        if (!user) {
-            throw new AppError("User not found.", StatusCodes.UNAUTHORIZED)
-        }
-        if (user?.dataValues?.status === 0) {
-            throw new AppError("User already logout.", StatusCodes.UNAUTHORIZED)
-        }
-        else if (user?.dataValues?.status === 2) {
-            throw new AppError("User is deleted", StatusCodes.UNAUTHORIZED)
+        if (!user || user?.dataValues?.status !== USER_STATUS.ACTIVE) {
+            throw new AppError("Unauthorized Access.", StatusCodes.UNAUTHORIZED)
         }
         next();
     } catch (error) {
@@ -57,11 +51,9 @@ const authorize = (requiredRoles = []) => {
             if (!role) {
                 throw new AppError('Role not found.', StatusCodes.NOT_FOUND);
             }
-
             if (!requiredRoles.includes(role.dataValues.key)) {
                 throw new AppError("Forbidden Access/Operation not allowed.", StatusCodes.FORBIDDEN);
             }
-
             next();
         } catch (error) {
             next(error);

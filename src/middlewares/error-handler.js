@@ -9,8 +9,8 @@ const errorHandler = (err, req, res, next) => {
   // Convert ValidationError to ApiError
 
   if (err instanceof ValidationError) {
-     ErrorResponse.message = err.error || "Validation error"
-     err = new AppError(err.details, err.statusCode || 400);
+    ErrorResponse.message = err.error || "Validation error"
+    err = new AppError(err.details, err.statusCode || 400);
   }
 
   // if (error.name === 'SequelizeValidationError') {
@@ -20,7 +20,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Ensure error is an instance of ApiError
   if (!(err instanceof AppError)) {
-    err = new AppError(err.message || "Internal Server Error",err.status || 500);
+    err = new AppError(err.message || "Internal Server Error", err.status || 500);
   }
 
 
@@ -30,7 +30,7 @@ const errorHandler = (err, req, res, next) => {
 
 // Handle 404 errors (Not Found)
 const notFound = (req, res, next) => {
-  const err = new AppError('API Not Found',StatusCodes.NOT_FOUND);
+  const err = new AppError('API Not Found', StatusCodes.NOT_FOUND);
   errorHandler(err, req, res);
 };
 
