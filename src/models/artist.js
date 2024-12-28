@@ -1,9 +1,7 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
+  class Artist extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -16,48 +14,48 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         as: "orgnization_details"
       });
-      this.belongsTo(models.Role, {
-        foreignKey: 'role_id',
+      this.belongsTo(models.User, {
+        foreignKey: 'created_by',
         onDelete: "CASCADE",
-        as: "role_details"
-      });
-      this.hasMany(models.Artist, {
-        foreignKey: 'artist_id',
-        onDelete: "CASCADE",
+        as: "creator_details",
       });
     }
   }
-  User.init({
-    user_id: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
-    },
-    email: {
+  Artist.init({
+    artist_id: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    status: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0
     },
     org_id: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    role_id: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
-    }
-  },
-    {
-      sequelize,
-      modelName: 'User',
-    });
-  return User;
+    },
+    created_by: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    grammy: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    hidden: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1
+    },
+  }, {
+    sequelize,
+    modelName: 'Artist',
+  });
+  return Artist;
 };
