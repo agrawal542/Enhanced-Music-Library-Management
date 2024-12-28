@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Enhanced Music Library Management API
-  description: APIs for handling authentication, user management, and profile functionalities.
+  description: APIs for handling authentication, user management, and artist management functionalities.
   version: 1.0.0
 
 servers:
@@ -11,6 +11,8 @@ servers:
 tags:
   - name: User
     description: APIs for user authentication and management
+  - name: Artist
+    description: APIs for managing artists
 
 paths:
   /api/v1/users/signup:
@@ -18,26 +20,56 @@ paths:
       tags:
         - User
       summary: Register a new user
-      description: Registers a new user as admin
+      description: Registers a new user as admin.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserSignup"
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: Password@123
+                org_name:
+                  type: string
+                  example: Example Corp
+              required:
+                - email
+                - password
+                - org_name
       responses:
         "201":
           description: User successfully registered.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User created successfully.
+                  data:
+                    type: object
         "400":
           description: Validation failed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Validation failed.
         "500":
           description: Internal server error.
 
@@ -52,20 +84,59 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserCredentials"
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: Password@123
+              required:
+                - email
+                - password
       responses:
         "200":
           description: User logged in successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged in successfully.
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      user:
+                        type: object
+                        properties:
+                          email:
+                            type: string
+                            example: user@example.com
+                          role:
+                            type: string
+                            example: admin
         "401":
           description: Unauthorized access.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid credentials.
         "500":
           description: Internal server error.
 
@@ -83,7 +154,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged out successfully.
         "500":
           description: Internal server error.
 
@@ -100,20 +178,50 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddUser"
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user2@example.com
+                password:
+                  type: string
+                  example: Password@123
+                role:
+                  type: string
+                  example: admin
+              required:
+                - email
+                - password
+                - role
       responses:
         "200":
           description: User added successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User created successfully.
+                  data:
+                    type: object
         "400":
           description: Validation failed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Validation failed.
         "500":
           description: Internal server error.
 
@@ -138,17 +246,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User deleted successfully.
         "404":
           description: User not found.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User not found.
         "500":
           description: Internal server error.
 
-  /api/v1/users/:
+  /api/v1/users:
     get:
       tags:
         - User
@@ -162,7 +284,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserListResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Users retrieved successfully.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id:
+                          type: string
+                          example: 12345
+                        email:
+                          type: string
+                          example: user@example.com
+                        role:
+                          type: string
+                          example: admin
         "500":
           description: Internal server error.
 
@@ -179,20 +322,319 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdatePassword"
+              type: object
+              properties:
+                old_password:
+                  type: string
+                  example: OldPassword@123
+                new_password:
+                  type: string
+                  example: NewPassword@123
+              required:
+                - old_password
+                - new_password
       responses:
         "200":
           description: Password updated successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password updated successfully.
         "400":
           description: Validation failed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Validation failed.
+        "500":
+          description: Internal server error.
+
+  /api/v1/artists:
+    get:
+      tags:
+        - Artist
+      summary: Retrieve all artists
+      description: Retrieves a list of all artists.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of artists retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Artists retrieved successfully.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        artist_id:
+                          type: string
+                          example: artist_12345
+                        name:
+                          type: string
+                          example: John Doe
+                        grammy:
+                          type: integer
+                          example: 5
+                        hidden:
+                          type: boolean
+                          example: false
+        "401":
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthorized.
+        "500":
+          description: Internal server error.
+
+    post:
+      tags:
+        - Artist
+      summary: Add a new artist
+      description: Adds a new artist to the system.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                grammy:
+                  type: integer
+                  example: 5
+                hidden:
+                  type: boolean
+                  example: false
+              required:
+                - name
+      responses:
+        "201":
+          description: Artist added successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Artist created successfully.
+                  data:
+                    type: object
+        "400":
+          description: Validation failed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Validation failed.
+        "500":
+          description: Internal server error.
+
+  /api/v1/artists/{artist_id}:
+    get:
+      tags:
+        - Artist
+      summary: Retrieve an artist
+      description: Retrieves details of an artist by their ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: artist_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the artist to retrieve.
+      responses:
+        "200":
+          description: Artist retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Artist retrieved successfully.
+                  data:
+                    type: object
+                    properties:
+                      artist_id:
+                        type: string
+                        example: artist_12345
+                      name:
+                        type: string
+                        example: John Doe
+                      grammy:
+                        type: integer
+                        example: 5
+        "404":
+          description: Artist not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Artist not found.
+        "500":
+          description: Internal server error.
+
+    put:
+      tags:
+        - Artist
+      summary: Update an artist
+      description: Updates the details of an artist.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: artist_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the artist to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                grammy:
+                  type: integer
+                  example: 5
+                hidden:
+                  type: boolean
+                  example: false
+      responses:
+        "204":
+          description: Artist updated successfully.
+        "400":
+          description: Validation failed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Validation failed.
+        "404":
+          description: Artist not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Artist not found.
+        "500":
+          description: Internal server error.
+
+    delete:
+      tags:
+        - Artist
+      summary: Delete an artist
+      description: Deletes an artist based on their ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: artist_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the artist to delete.
+      responses:
+        "200":
+          description: Artist deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Artist deleted successfully.
+        "404":
+          description: Artist not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Artist not found.
         "500":
           description: Internal server error.
 
@@ -202,120 +644,3 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
-  schemas:
-    UserSignup:
-      type: object
-      properties:
-        email:
-          type: string
-          example: user@example.com
-        password:
-          type: string
-          example: Password@123
-        org_name:
-          type: string
-          example: Example Corp
-      required:
-        - email
-        - password
-        - org_name
-
-    UserCredentials:
-      type: object
-      properties:
-        email:
-          type: string
-          example: user@example.com
-        password:
-          type: string
-          example: Password@123
-      required:
-        - email
-        - password
-
-    AddUser:
-      type: object
-      properties:
-        email:
-          type: string
-          example: user2@example.com
-        password:
-          type: string
-          example: Password@123
-        role:
-          type: string
-          example: admin
-      required:
-        - email
-        - password
-        - role
-
-    UpdatePassword:
-      type: object
-      properties:
-        old_password:
-          type: string
-          example: OldPassword@123
-        new_password:
-          type: string
-          example: NewPassword@123
-      required:
-        - old_password
-        - new_password
-
-    SuccessResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        message:
-          type: string
-          example: Operation completed successfully.
-        data:
-          type: object
-          example: {}
-
-    ErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        message:
-          type: string
-          example: An error occurred.
-        error:
-          type: object
-          example: { details: "Validation failed" }
-        data:
-          type: object
-          example: {}
-
-    UserListResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        message:
-          type: string
-          example: Users retrieved successfully.
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              user_id:
-                type: string
-                example: 12345
-              email:
-                type: string
-                example: user@example.com
-              role:
-                type: string
-                example: admin
-        error:
-          type: object
-          example: {}
